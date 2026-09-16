@@ -16,8 +16,10 @@ jobs:
       - run: ruff check .
       - run: pytest tests/unit
 
+  # Los jobs de deploy solo corren si el repo tiene la variable DATABRICKS_DEPLOY=true
+  # (Settings → Secrets and variables → Actions → Variables). Se activa en la clase 13.
   deploy-dev:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && vars.DATABRICKS_DEPLOY == 'true'
     needs: test
     runs-on: ubuntu-latest
     env:
@@ -30,7 +32,7 @@ jobs:
       - run: databricks bundle deploy -t dev
 
   deploy-qa:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') && vars.DATABRICKS_DEPLOY == 'true'
     needs: test
     runs-on: ubuntu-latest
     environment: qa
@@ -43,10 +45,10 @@ jobs:
       - run: databricks bundle deploy -t qa
 
   deploy-prod:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') && vars.DATABRICKS_DEPLOY == 'true'
     needs: deploy-qa
     runs-on: ubuntu-latest
-    environment: prod   # requiere aprobación manual configurada en GitHub
+    environment: prod
     env:
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
