@@ -1,4 +1,8 @@
 # Databricks notebook source
+# /// script
+# [tool.databricks.environment]
+# environment_version = "5"
+# ///
 # MAGIC %md
 # MAGIC # Lab 1 — Primer activo gobernado en el Lakehouse
 # MAGIC
@@ -12,7 +16,7 @@
 
 # COMMAND ----------
 
-dbutils.widgets.text("usuario", "")
+dbutils.widgets.text("usuario", "cajusquini")
 dbutils.widgets.text("archivo", "DemandaPerdidas.xlsx")
 
 usuario = dbutils.widgets.get("usuario").strip().lower()
@@ -135,4 +139,53 @@ verificar()
 
 # COMMAND ----------
 
-# Escribe aquí tu consulta
+resumen_series = spark.sql(f"""
+WITH por_serie AS (
+  SELECT
+    CodigoVariable,
+    CodigoSICAgente,
+    MercadoComercializacion,
+    TipoMercado,
+    ClasificacionIndustrial,
+    count(DISTINCT Fecha) AS dias_con_datos
+  FROM {tabla}
+  GROUP BY
+    CodigoVariable,
+    CodigoSICAgente,
+    MercadoComercializacion,
+    TipoMercado,
+    ClasificacionIndustrial
+)
+SELECT
+  count(*) AS total_series,
+  sum(CASE WHEN dias_con_datos = 206 THEN 1 ELSE 0 END) AS series_completas_206,
+  sum(CASE WHEN dias_con_datos < 206 THEN 1 ELSE 0 END) AS series_incompletas
+FROM por_serie
+""")
+resumen_series.display()
+
+# COMMAND ----------
+
+series_incompletas = spark.sql(f"""
+SELECT
+  CodigoVariable,
+  CodigoSICAgente,
+  MercadoComercializacion,
+  TipoMercado,
+  ClasificacionIndustrial,
+  count(DISTINCT Fecha) AS dias_con_datos,
+  206 - count(DISTINCT Fecha) AS dias_faltantes
+FROM {tabla}
+GROUP BY
+  CodigoVariable,
+  CodigoSICAgente,
+  MercadoComercializacion,
+  TipoMercado,
+  ClasificacionIndustrial
+HAVING count(DISTINCT Fecha) < 206
+ORDER BY dias_faltantes DESC
+""")
+series_incompletas.display()
+
+# COMMAND ----------
+
