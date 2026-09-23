@@ -2,7 +2,7 @@
 # MAGIC %md
 # MAGIC # Taller corto — Cómo usamos el repositorio: ramas, tags y `verificar()`
 # MAGIC
-# MAGIC **Duración:** 30 min · **Modalidad:** todos a la vez, cada uno en su Git folder
+# MAGIC 
 # MAGIC
 # MAGIC Tres cosas al salir de aquí:
 # MAGIC 1. Saber qué hay en `main`, qué hay en `solution` y qué es un tag `sNN`.
@@ -11,7 +11,7 @@
 
 # COMMAND ----------
 
-dbutils.widgets.text("docente_github", "")
+dbutils.widgets.text("docente_github", "manularrea")
 dbutils.widgets.text("tu_github", "")
 docente = dbutils.widgets.get("docente_github").strip()
 yo = dbutils.widgets.get("tu_github").strip()
