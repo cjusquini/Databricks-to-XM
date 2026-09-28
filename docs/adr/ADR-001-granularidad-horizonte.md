@@ -1,22 +1,23 @@
 # ADR-001: Granularidad y horizonte del pronóstico
 
-- **Estado:** propuesta
-- **Fecha:** <AAAA-MM-DD>
-- **Autor:** <tu nombre>
+- **Estado:** aceptada
+- **Fecha:** 2026-09-28
+- **Autor:** cjusquini
 
 ## Contexto
 
-<Qué sabemos del dato y del negocio que obliga a decidir: cuántos días de historia hay, cómo llega el dato, cuántas series, qué pide XM ("siguiente período"), qué necesita el curso.>
+Datos de demanda real y pérdidas de energía, por tipo de mercado y clasificación CIIU asociado a su actividad comercial. Se busca desarrollar un pronóstico por agente, mercado, CIIU en un horizonte de 7 días
 
 ## Decisión
 
-<Escribe la decisión en una o dos frases y luego justifícala. Cubre tres puntos: granularidad temporal (diaria / semanal / mensual), horizonte (cuántos periodos hacia adelante) y alcance del modelo (uno global para todas las series, uno por tipo de mercado, uno por serie).>
+Se realizará un pronóstico con granularidad serie-día, horizonte: 7 días a futuro, alcance del modelo: 7 días a futuro por agente, mercado, CIIU.
 
 ## Alternativas consideradas
 
-- <Alternativa 1>: <por qué se descarta>
-- <Alternativa 2>: <por qué se descarta>
+- Alternativa 1: Modelo SARIMAX (pdte)
+- Alternativa 2: Modelo Regresión Lineal Múltiple (pdte)
+- Alternativa 3: Modelo Redes Neuronales (pdte)
 
 ## Consecuencias
 
-<Qué se gana, qué se pierde, qué queda en el backlog y qué habría que cambiar para revertirla.>
+Se gana un horizonte con un error reducido de cómo se comportará la demanda, la idea es tomar acciones a nivel de OR de cómo gestionar sus activos. Para revertir las decisiones se debe ajustar el modelo y los datos dada la necesidad.
