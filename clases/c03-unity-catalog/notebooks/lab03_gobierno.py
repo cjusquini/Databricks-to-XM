@@ -1,4 +1,8 @@
 # Databricks notebook source
+# /// script
+# [tool.databricks.environment]
+# environment_version = "6"
+# ///
 # MAGIC %md
 # MAGIC # Lab 3 — Gobernar tu propio esquema
 # MAGIC
@@ -10,8 +14,8 @@
 
 # COMMAND ----------
 
-dbutils.widgets.text("usuario", "")
-dbutils.widgets.text("companero", "")
+dbutils.widgets.text("usuario", "cajusquini")
+dbutils.widgets.text("companero", "ingqcosebastianruiz@gmail.com")
 usuario = dbutils.widgets.get("usuario").strip().lower()
 companero = dbutils.widgets.get("companero").strip().lower()
 assert usuario, "Escribe tu usuario (el sufijo de tu esquema c01_<usuario>)."
@@ -48,7 +52,7 @@ spark.sql(f"SHOW GRANTS ON TABLE {tabla}").display()
 # COMMAND ----------
 
 # La celda que usa el compañero para consultar la tabla de otro (cambia el usuario de la tabla):
-# spark.sql("SELECT TipoMercado, count(*) AS filas, round(sum(Valor)) AS kwh FROM workspace.c01_<companero>.demanda_raw WHERE CodigoVariable = 'DdaReal' GROUP BY ALL").display()
+spark.sql("SELECT TipoMercado, count(*) AS filas, round(sum(Valor)) AS kwh FROM workspace.c01_cajusquini.demanda_raw WHERE CodigoVariable = 'DdaReal' GROUP BY ALL").display()
 
 # COMMAND ----------
 
@@ -66,7 +70,7 @@ spark.sql(f"SHOW GRANTS ON TABLE {tabla}").display()
 # MAGIC %md
 # MAGIC **Pregunta.** El error de tu compañero, ¿menciona la tabla o el esquema? ¿Por qué el USE SCHEMA que sigue vigente no le alcanza?
 # MAGIC
-# MAGIC _Tu respuesta:_
+# MAGIC _Tu respuesta:_ Indica que no existen permisos de SELECT sobre la tabla. El USE SCHEMA por la falta de privilegios sobre la tabla
 
 # COMMAND ----------
 
@@ -81,17 +85,17 @@ spark.sql(f"SHOW GRANTS ON TABLE {tabla}").display()
 
 # COMMAND ----------
 
-# TODO: completa las dos funciones. Pista: current_user() devuelve tu correo; la variable `yo` ya lo tiene.
+# Funciones de gobernanza: el filtro de filas y la máscara de columna viven en el catálogo.
 spark.sql(f"""
 CREATE OR REPLACE FUNCTION {esquema}.solo_regulado(tipo STRING)
 RETURNS BOOLEAN
-RETURN <condición>
+RETURN CASE WHEN current_user() = '{yo}' THEN true ELSE tipo = 'Regulado' END
 """)
 
 spark.sql(f"""
 CREATE OR REPLACE FUNCTION {esquema}.mascara_kwh(v DOUBLE)
 RETURNS DOUBLE
-RETURN <expresión>
+RETURN CASE WHEN current_user() = '{yo}' THEN v ELSE round(v, -3) END
 """)
 
 # COMMAND ----------
@@ -119,7 +123,7 @@ spark.sql(f"SHOW GRANTS ON TABLE {tabla}").display()
 # MAGIC %md
 # MAGIC **Pregunta.** ¿Qué pasaría si en vez de `account users` el GRANT fuera a un grupo `grp_negocio` que aún no existe? ¿Y si mañana entra una persona nueva a XM: a quién hay que tocar, la tabla o el grupo?
 # MAGIC
-# MAGIC _Tu respuesta:_
+# MAGIC _Tu respuesta:_ El select fallará, ya que los usuarios hacen parte un grupo inexistente. Si entra una persona nueva se debería agregar esa persona al grupo y que herede los permisos
 
 # COMMAND ----------
 
@@ -129,11 +133,10 @@ spark.sql(f"SHOW GRANTS ON TABLE {tabla}").display()
 
 # COMMAND ----------
 
-# TODO: pon los cuatro tags y los comentarios.
-spark.sql(f"ALTER TABLE {tabla} SET TAGS ('capa' = '<…>', 'dominio' = '<…>', 'owner' = '<…>', 'sensibilidad' = '<…>')")
-spark.sql(f"COMMENT ON TABLE {tabla} IS '<qué contiene, con qué grano, quién la publica>'")
-spark.sql(f"ALTER TABLE {tabla} ALTER COLUMN Valor COMMENT '<…>'")
-spark.sql(f"ALTER TABLE {tabla} ALTER COLUMN FechaPublicacion COMMENT '<…>'")
+spark.sql(f"ALTER TABLE {tabla} SET TAGS ('capa' = 'bronce', 'dominio' = 'energia', 'owner' = 'datalake', 'sensibilidad' = 'interno')")
+spark.sql(f"COMMENT ON TABLE {tabla} IS 'Demanda y pérdidas de energía diaria por agente'")
+spark.sql(f"ALTER TABLE {tabla} ALTER COLUMN Valor COMMENT 'Valor de la variable medida en kWh (DdaReal) o estimada en kWh (DdaProg).'")
+spark.sql(f"ALTER TABLE {tabla} ALTER COLUMN FechaPublicacion COMMENT 'Fecha en que el dato fue publicado o disponibilizado por XM.'")
 
 spark.sql(f"SELECT tag_name, tag_value FROM workspace.information_schema.table_tags WHERE schema_name = 'c01_{usuario}' AND table_name = 'demanda_raw'").display()
 
