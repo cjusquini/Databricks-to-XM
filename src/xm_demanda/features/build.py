@@ -28,6 +28,23 @@ def nombres_ventanas(ventanas: list[int]) -> list[str]:
     return [f"media_{n}" for n in ventanas] + [f"desv_{n}" for n in ventanas]
 
 
+COLUMNAS_CALENDARIO = ["dia_semana", "es_fin_de_semana", "es_festivo", "mes", "dia_del_anio"]
+COLUMNAS_BANDERAS = ["es_cero", "dias_con_datos"]
+
+
+def columnas_contrato(cfg: dict) -> list[str]:
+    """Columnas de features_demanda_diaria, en orden, derivadas de la configuración.
+
+    Es el contrato de oro como código: la tabla real debe tener exactamente estas columnas.
+    Pura: se prueba sin Spark y la usa verificar() en el lab y el notebook de producción.
+    [llave, medida, calendario, lags, ventanas, banderas, objetivo, _features_built_at]
+    """
+    # TODO (lab 8, sección 3): implementar con LLAVE, MEDIDA, COLUMNAS_CALENDARIO,
+    # nombres_lags(cfg["modelo"]["lags"]), nombres_ventanas(cfg["modelo"]["ventanas"]),
+    # COLUMNAS_BANDERAS, f"y_h{cfg['modelo']['horizon_days']}" y "_features_built_at".
+    raise NotImplementedError("columnas_contrato: completa esta función (lab 8, sección 3)")
+
+
 def es_fin_de_semana(dia_semana: int) -> bool:
     """dia_semana con la convención de Spark dayofweek: 1 = domingo … 7 = sábado."""
     return dia_semana in (1, 7)
