@@ -39,10 +39,17 @@ def columnas_contrato(cfg: dict) -> list[str]:
     Pura: se prueba sin Spark y la usa verificar() en el lab y el notebook de producción.
     [llave, medida, calendario, lags, ventanas, banderas, objetivo, _features_built_at]
     """
-    # TODO (lab 8, sección 3): implementar con LLAVE, MEDIDA, COLUMNAS_CALENDARIO,
-    # nombres_lags(cfg["modelo"]["lags"]), nombres_ventanas(cfg["modelo"]["ventanas"]),
-    # COLUMNAS_BANDERAS, f"y_h{cfg['modelo']['horizon_days']}" y "_features_built_at".
-    raise NotImplementedError("columnas_contrato: completa esta función (lab 8, sección 3)")
+    m = cfg["modelo"]
+    return [
+        *LLAVE,
+        MEDIDA,
+        *COLUMNAS_CALENDARIO,
+        *nombres_lags(m["lags"]),
+        *nombres_ventanas(m["ventanas"]),
+        *COLUMNAS_BANDERAS,
+        f"y_h{m['horizon_days']}",
+        "_features_built_at",
+    ]
 
 
 def es_fin_de_semana(dia_semana: int) -> bool:
