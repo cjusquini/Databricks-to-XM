@@ -3,6 +3,7 @@ import pytest
 from xm_demanda.features.build import (
     COLUMNAS_BANDERAS,
     COLUMNAS_CALENDARIO,
+    COLUMNAS_CATEGORICAS,
     MEDIDA,
     columnas_contrato,
     es_fin_de_semana,
@@ -54,6 +55,8 @@ def test_contrato_con_la_configuracion_real():
     cols = _contrato(load_config("dev"))
     assert cols[: len(LLAVE)] == LLAVE and cols[len(LLAVE)] == MEDIDA
     assert set(COLUMNAS_CALENDARIO) <= set(cols) and set(COLUMNAS_BANDERAS) <= set(cols)
+    assert set(COLUMNAS_CATEGORICAS) <= set(cols)
+    assert not {"perdidas_kwh", "_publication_date"} & set(cols)  # se quedan en plata
     assert {"lag_1", "lag_7", "lag_14", "lag_28", "media_7", "desv_28", "y_h7"} <= set(cols)
     assert cols[-1] == "_features_built_at" and len(cols) == len(set(cols))
 

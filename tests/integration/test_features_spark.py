@@ -23,6 +23,7 @@ SERIES = [
     ("XYZ", "CARIBE", "No Regulado", "EXPLOTACION DE MINAS Y CANTERAS"),
 ]
 INICIO = dt.date(2026, 1, 1)
+COLS_PLATA = [*fb.LLAVE, fb.MEDIDA, "perdidas_kwh", "_publication_date", "ciiu_seccion"]
 
 
 def _demanda(i: int, d: int, fecha: dt.date) -> float:
@@ -38,9 +39,9 @@ def diaria(spark):
     for i, serie in enumerate(SERIES):
         for d in range(0, 120 - 30 * i):  # series de 120, 90 y 60 días
             fecha = INICIO + dt.timedelta(days=d)
-            filas.append((fecha, *serie, _demanda(i, d, fecha), 10.0, fecha))
-    cols = ["fecha", *fb.LLAVE_SERIE, fb.MEDIDA, "perdidas_kwh", "_publication_date"]
-    return spark.createDataFrame(filas, cols)
+            ciiu = "X" if i == 0 else "P"
+            filas.append((fecha, *serie, _demanda(i, d, fecha), 10.0, fecha, ciiu))
+    return spark.createDataFrame(filas, COLS_PLATA)
 
 
 @pytest.fixture(scope="module")
@@ -57,16 +58,20 @@ def features(diaria, festivos):
         pytest.skip("Pendiente: TODO del lab 7 (agregar_calendario / agregar_lags)")
 
 
+def test_oro_solo_tiene_las_columnas_del_contrato(features):
+    assert not {"perdidas_kwh", "_publication_date"} & set(features.columns)
+    assert "ciiu_seccion" in features.columns and "_features_built_at" in features.columns
+
+
 def test_calendario_sin_nulos_en_anio_cubierto(features):
     assert features.filter("es_festivo IS NULL OR dia_semana IS NULL").count() == 0
     assert features.filter("es_festivo").select("fecha").distinct().count() == 4
 
 
 def test_calendario_nulo_fuera_de_los_anios_del_archivo(spark, festivos):
-    fila = [(dt.date(2030, 1, 1), *SERIES[0], 1.0, 1.0, dt.date(2030, 1, 1))]
-    cols = ["fecha", *fb.LLAVE_SERIE, fb.MEDIDA, "perdidas_kwh", "_publication_date"]
+    fila = [(dt.date(2030, 1, 1), *SERIES[0], 1.0, 1.0, dt.date(2030, 1, 1), "X")]
     try:
-        out = fb.agregar_calendario(spark.createDataFrame(fila, cols), festivos)
+        out = fb.agregar_calendario(spark.createDataFrame(fila, COLS_PLATA), festivos)
     except NotImplementedError:
         pytest.skip("Pendiente: TODO del lab 7")
     assert out.filter("es_festivo IS NULL").count() == 1
