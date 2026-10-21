@@ -45,10 +45,13 @@ class NaiveFestivo:
         self.factor_global = 1.0
 
     def fit(self, df: pd.DataFrame, objetivo: str):
-        # TODO (lab 9, sección 7): self.factores = {serie: media(domingos) / media(lun-vie)}
-        # usando dia_semana (1 = domingo, 2..6 = lunes a viernes) y llave_serie(df); y
-        # self.factor_global = mediana de los factores (para series nuevas). Devolver self.
-        raise NotImplementedError("NaiveFestivo.fit: completa este método (lab 9, sección 7)")
+        d = df.assign(serie=llave_serie(df))
+        domingos = d[d["dia_semana"] == 1].groupby("serie")["demanda_real_kwh"].mean()
+        laborales = d[d["dia_semana"].between(2, 6)].groupby("serie")["demanda_real_kwh"].mean()
+        factores = (domingos / laborales.replace(0, np.nan)).dropna().clip(0.2, 1.5)
+        self.factores = factores.to_dict()
+        self.factor_global = float(factores.median()) if len(factores) else 1.0
+        return self
 
     def predict(self, df: pd.DataFrame) -> np.ndarray:
         fecha_obj = pd.to_datetime(df["fecha"]) + pd.Timedelta(days=self.horizonte)

@@ -20,8 +20,9 @@ def wape(y, yhat) -> float:
     >>> wape([100, 200], [110, 180])
     0.1
     """
-    # TODO (lab 9, sección 2): implementar en 3 líneas con numpy. Cuida el caso sum(|y|) == 0.
-    raise NotImplementedError("wape: completa esta función (lab 9, sección 2)")
+    y, yhat = np.asarray(y, dtype=float), np.asarray(yhat, dtype=float)
+    denominador = np.abs(y).sum()
+    return float(np.abs(y - yhat).sum() / denominador) if denominador > 0 else float("nan")
 
 
 def metricas(y, yhat) -> dict[str, float]:

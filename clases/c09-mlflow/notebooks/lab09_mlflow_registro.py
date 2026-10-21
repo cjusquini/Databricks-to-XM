@@ -411,7 +411,7 @@ run_fuga, _, m_fuga = correr_experimento(LightGBMConFuga(), tr_f, va_f, tags={"f
 # MAGIC por qué no se puede promover, y qué dos cosas del tracking (no de la métrica) te permitirían detectarlo dentro de seis meses
 # MAGIC si no estuvieras en esta clase.
 # MAGIC
-# MAGIC > Tu respuesta:
+# MAGIC > Tu respuesta: la feature `tendencia_suavizada` se calcula con una ventana centrada y se une por la fecha objetivo, así que en la fila de t ya contiene y(t+7) mezclado con sus vecinos: en producción, el día t, ese valor no existe, y el modelo perdería justo la columna que más usa. Su WAPE de la mitad no es mérito, es la respuesta filtrada. Dentro de seis meses lo delatarían dos cosas del tracking: el tag `fuga = true` y el parámetro `feature_extra` que describe cómo se construyó la columna; y, aunque nadie los hubiera puesto, la comparación en la misma tabla de runs: un salto de 0,05 a 0,024 sobre un baseline que nadie había podido vencer es una alarma, no un logro.
 
 # COMMAND ----------
 
@@ -544,7 +544,7 @@ display(pron.sort_values("demanda_estimada_kwh", ascending=False).head(10))
 # MAGIC ¿Cuál dejarías como `@champion` para XM y por qué? Considera algo más que el WAPE: explicabilidad ante un auditor, costo de
 # MAGIC mantener cada uno, qué pasa el próximo festivo, y qué harías para que la decisión sea más clara en tres meses.
 # MAGIC
-# MAGIC > Tu respuesta:
+# MAGIC > Tu respuesta (una de las defendibles): dejaría `lightgbm_global` como @champion porque gana en el promedio del walk-forward (0,048 contra 0,054), que es más representativo que un solo corte con dos festivos. Pero la diferencia es pequeña y depende del mes, y `naive_festivo` tiene ventajas reales: se explica en una frase ante un auditor ("el festivo se pronostica como domingo, con el factor de cada serie"), no se degrada si cambian las features y cuesta casi nada mantenerlo. Por eso queda como @challenger, corriendo en paralelo. Para decidir mejor en tres meses: más cortes en el walk-forward (incluyendo meses con puentes), WAPE separado en días festivos, y un LightGBM que reciba `es_festivo_objetivo` como feature para ver si absorbe la regla.
 
 # COMMAND ----------
 
