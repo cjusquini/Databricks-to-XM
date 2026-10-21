@@ -12,3 +12,5 @@ Sesión doble (2 h 30 min). Cubre el temario de las clases 9 (experimentación) 
 | Cierre | 10 min | tag `s09`, "así sería en Azure", próxima clase |
 
 El detalle de teoría, práctica, contexto del sector y entregable está en el [README del curso](../../README.md#detalle-por-clase).
+
+- Para ver qué cambió entre la solución de la clase 8 y la 9: `git diff s08 s09 --stat`
