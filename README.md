@@ -125,11 +125,11 @@ Hitos (según el programa del curso): H1 pregunta analítica · H2 arquitectura 
 - **Sector:** cómo pronostican demanda XM, ENTSO-E y AEMO; por qué el baseline estacional es difícil de vencer en demanda eléctrica; trazabilidad de qué modelo produjo qué pronóstico con qué datos.
 - **Entregable:** experimento con 7 runs comparables y modelo registrado con alias y firma. Hito 5 abierto.
 
-### Clase 11 — Inferencia batch, Serving y Apps
-- **Teoría:** batch vs. tiempo real vs. app: criterios de decisión; Model Serving (CPU/GPU, escalado, monitoreo de endpoint); AI Gateway; Databricks Apps; Genie y AI/BI Dashboards; lo que Free Edition permite (Serving CPU, 3 apps con caducidad de 24 h).
-- **Práctica:** job de inferencia batch a `gold_energia.pronostico_demanda`; endpoint del modelo campeón; app Streamlit "observado vs. estimado" por segmento.
-- **Sector:** Octopus Energy y los pronósticos como servicio interno; qué consumidores hay en XM para un pronóstico (planeación, seguimiento, mercado) y qué canal necesita cada uno.
-- **Entregable:** tabla de pronósticos, endpoint y app funcionando. Hito 5 cerrado.
+### Clase 11 — Del modelo registrado a quien lo usa: inferencia batch, Serving y Apps
+- **Teoría:** cuatro canales para un pronóstico (batch, tiempo real, app, AI/BI) y tres preguntas para escoger (frescura de los datos, quién trae las features, persona o sistema); inferencia batch auditable (alias resuelto una vez, versión de los datos, validación antes de publicar); `MERGE` idempotente y challenger en sombra; Model Serving (served entity, scale to zero, traffic split, AI Gateway y tablas de inferencia); Databricks Apps como principal de Unity Catalog (autorización de app y de usuario); dashboards AI/BI y Genie; lo que Free Edition permite (CPU, pocos endpoints, 3 apps de 24 h).
+- **Práctica:** `pronostico_demanda` con linaje (modelo, versión, versión de los datos) para `@champion` y `@challenger`; `MERGE` corrido dos veces sin duplicar; vista `v_observado_vs_estimado` cuyo WAPE coincide con el run de la clase 9; consulta del endpoint compartido `xm-demanda-7d`; `GRANT` mínimos para que la app compartida lea la vista; datasets de un dashboard AI/BI y demo de Genie.
+- **Sector:** el pronóstico como servicio interno (AEMO, Octopus Energy en la plataforma de energía de Databricks); qué consumidores tiene en XM (planeación, seguimiento, gerencia, simulación) y qué canal necesita cada uno.
+- **Entregable:** tabla de pronósticos, vista observado vs. estimado, endpoint consultado y app leyendo la vista. Hito 5 cerrado.
 
 ### Clase 12 — Orquestación con Lakeflow Jobs
 - **Teoría:** jobs multi-tarea, dependencias, parámetros, reintentos, timeouts, notificaciones; triggers por calendario y por llegada de archivo; concurrencia; cuándo integrar Azure Data Factory o Airflow y cuándo no.

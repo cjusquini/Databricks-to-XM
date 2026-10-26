@@ -29,7 +29,7 @@ Rutas que cambian en cada clase (lo demás del diff es ruido):
 | 7 | `s07` | `src/xm_demanda/features clases/c07-features-gold/notebooks notebooks/03_gold_features.py` |
 | 8 | `s08` | `src/xm_demanda/utils src/xm_demanda/features tests .github/workflows clases/c08-codigo-config/notebooks` |
 | 9–10 | `s09` | `src/xm_demanda/model clases/c09-mlflow/notebooks notebooks/04_train.py` |
-| 11 | `s11` | `notebooks/05_batch_inference.py app resources` |
+| 11 | `s11` | `src/xm_demanda/inference notebooks/05_batch_inference.py app clases/c11-serving-apps/notebooks` |
 | 12 | `s12` | `resources databricks.yml conf` |
 | 13 | `s13` | `databricks.yml resources .github/workflows ci` |
 | 14 | `s14` | `notebooks/06_monitor.py resources` |
