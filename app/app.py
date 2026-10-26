@@ -148,7 +148,7 @@ futuro = pd.DataFrame(
 sombra = alt.Chart(futuro).mark_rect(opacity=0.12, color="#6B7280").encode(x="inicio:T", x2="fin:T")
 st.subheader("Observado vs. estimado")
 st.caption("La franja gris es el futuro: pronósticos que todavía no se pueden comparar.")
-st.altair_chart(sombra + lineas, width="stretch")
+st.altair_chart(sombra + lineas, use_container_width=True)
 
 # --- Dónde está el error ---
 izq, der = st.columns(2)
