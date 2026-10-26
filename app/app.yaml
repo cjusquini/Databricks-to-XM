@@ -1,1 +1,9 @@
+# Databricks App "observado vs. estimado" (clase 11).
+# Al crear la app: Compute → Apps → Create app → Custom, agregar el recurso SQL warehouse con
+# clave "sql-warehouse" y permiso "Can use", y desplegar desde la carpeta app/ del Git folder.
 command: ["streamlit", "run", "app.py"]
+env:
+  - name: XM_WAREHOUSE_ID
+    valueFrom: sql-warehouse
+  - name: XM_CATALOGO
+    value: workspace

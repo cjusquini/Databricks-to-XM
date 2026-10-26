@@ -28,7 +28,7 @@ resources:
           depends_on: [{ task_key: gold_features }]
           notebook_task:
             notebook_path: ../notebooks/05_batch_inference.py
-            base_parameters: { catalog: "${var.catalog}", horizon_days: "${var.horizon_days}" }
+            base_parameters: { catalog: "${var.catalog}", alias: champion }
         - task_key: monitor
           depends_on: [{ task_key: batch_inference }]
           notebook_task:
