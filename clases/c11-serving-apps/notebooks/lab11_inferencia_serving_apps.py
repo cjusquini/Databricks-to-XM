@@ -364,7 +364,8 @@ print("Latencias (ms):", [round(x) for x in latencias], "← la primera puede in
 
 assert APP_SP, "Escribe en el widget app_sp el ID de aplicación del service principal de la app (lo comparte la docente)."
 GRANTS = [
-    # TODO 2 (sección 7): las dos sentencias GRANT, como f-strings. Usa {esquema}, {V_OBS} y `{APP_SP}`.
+    f"GRANT USE SCHEMA ON SCHEMA {esquema} TO `{APP_SP}`",
+    f"GRANT SELECT ON TABLE {V_OBS} TO `{APP_SP}`",
 ]
 assert GRANTS, "TODO 2: escribe las dos sentencias GRANT"
 for g in GRANTS:

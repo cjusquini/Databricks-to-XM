@@ -68,9 +68,21 @@ def preparar_pronosticos(
     que se leyó) y generado_en. Lanza ValueError si yhat no tiene una predicción por fila o
     trae nulos o infinitos: un pronóstico vacío no se publica.
     """
-    # TODO (lab 11, sección 3): implementar. Pistas: np.asarray(yhat, dtype=float),
-    # np.isfinite, pd.Timedelta(days=horizonte), .clip(lower=0) y COLUMNAS_PRONOSTICO.
-    raise NotImplementedError("preparar_pronosticos: completa esta función (lab 11, sección 3)")
+    y = np.asarray(yhat, dtype=float).ravel()
+    if len(y) != len(filas):
+        raise ValueError(f"{len(y)} predicciones para {len(filas)} filas")
+    if not np.isfinite(y).all():
+        raise ValueError("Hay predicciones nulas o infinitas: un pronóstico vacío no se publica")
+    out = filas[LLAVE_SERIE].reset_index(drop=True).copy()
+    out["fecha_emision"] = pd.to_datetime(filas["fecha"]).reset_index(drop=True)
+    out["fecha_pronostico"] = out["fecha_emision"] + pd.Timedelta(days=horizonte)
+    out["demanda_estimada_kwh"] = pd.Series(y).clip(lower=0)
+    out["modelo"] = modelo
+    out["modelo_version"] = str(version)
+    out["alias"] = alias
+    out["version_datos"] = int(version_datos)
+    out["generado_en"] = pd.Timestamp(generado_en)
+    return out[COLUMNAS_PRONOSTICO]
 
 
 def ddl_pronostico(tabla: str) -> str:
