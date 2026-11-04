@@ -28,7 +28,7 @@ Abre `clases/c12-jobs/notebooks/lab12_orquestacion_jobs`. Widget `usuario`.
 | 6 | Corrida 2: `fecha_proceso = 2026-07-27`, `forzar = no` | `bronce` y la condición en verde, la rama `EXCLUDED`, `chequeo` en `FAILED` con el mensaje de atraso; correo de alerta |
 | 7 | Llega el archivo tarde + *Repair run* | Segundo intento de la misma corrida, todo en verde; oro hasta el 26-jul y pronóstico hasta el 2-ago |
 | 8 | Interfaz: Runs, Tasks, Schedules & Triggers, notificaciones, permisos | — |
-| Preguntas | `ALL_DONE` vs. `ALL_SUCCESS`; calendario vs. llegada de archivo | — |
+| Preguntas | por qué el chequeo depende de `bronce` y usa `ALL_DONE`; calendario vs. llegada de archivo | — |
 | `verificar()` | 7 comprobaciones en OK | Commit `feat(c12): job diario como código con política de fallas y chequeo de frescura` → push → PR → CI → merge |
 
 La sección 7 agrega a tu landing un archivo simulado (`demanda_2026-07-27_tardio.csv`, copia del 19 de julio con fecha 26). Si quieres volver al estado anterior, bórralo del volumen y reconstruye bronce como en el paso 6 del lab 4.
@@ -36,7 +36,7 @@ La sección 7 agrega a tu landing un archivo simulado (`demanda_2026-07-27_tardi
 ## Criterios de aceptación
 
 - [ ] `politica()` implementada; `tests/unit/test_orquestacion.py` sin skip
-- [ ] Job con 7 tareas, condición `hay_datos_nuevos` y `chequeo` con `run_if = ALL_DONE`
+- [ ] Job con 7 tareas, condición `hay_datos_nuevos` y `chequeo` con `run_if = ALL_DONE` que depende de `bronce` e `inferencia`
 - [ ] Una corrida exitosa y una corrida reparada (dos intentos)
 - [ ] Oro hasta el 26-jul; pronóstico del champion hasta el 2-ago
 - [ ] Las dos preguntas respondidas

@@ -4,8 +4,11 @@ Funciones puras: no hablan con Databricks. El lab 12 las usa para crear el job c
 clase 13 lleva exactamente esta misma estructura a `resources/*.yml` de un bundle.
 
     bronce ─► hay_datos_nuevos ─(true)─► calidad ─► plata ─► oro ─► inferencia ─► chequeo
-                                 └─(false)─ (se excluye la rama)                   ▲
-                                                                     run_if ALL_DONE: corre siempre
+       │                         └─(false)─ (se excluye la rama)                   ▲
+       └────────────────────────────────────────────────────────────────────────────┘
+    chequeo depende de inferencia Y de bronce, con run_if ALL_DONE: corre siempre. Si dependiera
+    solo de inferencia, al excluirse la rama quedaría excluido también (regla de Databricks: una
+    tarea cuyas dependencias están todas excluidas se excluye, sin importar su run_if).
 """
 
 TAREAS = ["bronce", "hay_datos_nuevos", "calidad", "plata", "oro", "inferencia", "chequeo"]
@@ -86,7 +89,7 @@ def definicion_job(usuario: str, ruta_tareas: str, email: str | None = None) -> 
         notebook("plata", [{"task_key": "calidad"}]),
         notebook("oro", [{"task_key": "plata"}]),
         notebook("inferencia", [{"task_key": "oro"}]),
-        notebook("chequeo", [{"task_key": "inferencia"}]),
+        notebook("chequeo", [{"task_key": "bronce"}, {"task_key": "inferencia"}]),
     ]
     definicion = {
         "name": nombre_job(usuario),
