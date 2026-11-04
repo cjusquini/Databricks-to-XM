@@ -12,7 +12,8 @@
 # MAGIC   bronce ──► hay_datos_nuevos ──(true)──► calidad ──► plata ──► oro ──► inferencia ──► chequeo
 # MAGIC   clase 4    if/else sobre un            clase 5     clase 6   clase 7  clase 11       run_if ALL_DONE
 # MAGIC              task value de bronce                                       2 reintentos   corre siempre
-# MAGIC                    └──(false)── la rama se excluye ────────────────────────────────────────┘
+# MAGIC      │             └──(false)── la rama se excluye                                          ▲
+# MAGIC      └──────────────────────────── chequeo depende también de bronce ──────────────────────────┘
 # MAGIC ```
 # MAGIC
 # MAGIC Tres corridas: (1) un día normal; (2) **el archivo del día no llegó**: todo termina "bien" y solo el chequeo lo
@@ -216,8 +217,12 @@ display(resumen(r1))
 # MAGIC Es 27 de julio. XM no ha publicado el archivo del 26. Bronce lee 0 archivos, termina **en verde** y publica
 # MAGIC `procesar = no`; la tarea `hay_datos_nuevos` toma la rama `false` y calidad, plata, oro e inferencia quedan **excluidas**.
 # MAGIC Sin el chequeo, este job terminaría en verde, el tablero mostraría el pronóstico de ayer como si fuera de hoy y nadie lo
-# MAGIC notaría hasta que planeación preguntara. El chequeo corre siempre (`ALL_DONE`) y lo convierte en una falla con un
-# MAGIC mensaje que dice qué pasó y qué hacer. Esa falla dispara el correo.
+# MAGIC notaría hasta que planeación preguntara. El chequeo corre siempre y lo convierte en una falla con un mensaje que dice
+# MAGIC qué pasó y qué hacer. Esa falla dispara el correo.
+# MAGIC
+# MAGIC "Corre siempre" necesita dos cosas, no una: `run_if = ALL_DONE` **y** depender también de `bronce`. Databricks excluye
+# MAGIC una tarea cuando **todas** sus dependencias quedaron excluidas, sin importar su *Run if*. Si el chequeo dependiera solo
+# MAGIC de `inferencia`, se excluiría junto con la rama y el job terminaría en verde: justo la falla que queremos ver.
 
 # COMMAND ----------
 
@@ -284,8 +289,9 @@ display(resumen(r3))
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC **Pregunta 1 (respóndela aquí):** el chequeo usa `run_if = ALL_DONE`. ¿Qué pasaría con la alerta de la corrida 2 si lo
-# MAGIC dejaras con el valor por defecto (`ALL_SUCCESS`)? ¿Y si `inferencia` fallara después de sus dos reintentos?
+# MAGIC **Pregunta 1 (respóndela aquí):** el chequeo depende de `bronce` y de `inferencia`, con `run_if = ALL_DONE`. (a) ¿Qué
+# MAGIC pasaría en la corrida 2 si dependiera solo de `inferencia`? (b) ¿Y si lo dejaras con el valor por defecto (`ALL_SUCCESS`)
+# MAGIC y `inferencia` fallara después de sus dos reintentos?
 # MAGIC
 # MAGIC > Tu respuesta:
 # MAGIC
@@ -318,7 +324,9 @@ def verificar():
         trabajos = [j for j in api("GET", "list", query={"name": jobdef.nombre_job(usuario), "expand_tasks": "true"}).get("jobs", [])]
         tareas = {t["task_key"]: t for t in trabajos[0]["settings"]["tasks"]} if trabajos else {}
         checks.append(("Job creado con las 7 tareas del DAG", set(tareas) == set(jobdef.TAREAS)))
-        checks.append(("Chequeo con run_if ALL_DONE en el job desplegado", tareas.get("chequeo", {}).get("run_if") == "ALL_DONE"))
+        ch = tareas.get("chequeo", {})
+        checks.append(("Chequeo con run_if ALL_DONE y dependencia de bronce en el job desplegado",
+                       ch.get("run_if") == "ALL_DONE" and "bronce" in {d["task_key"] for d in ch.get("depends_on", [])}))
         runs = api("GET", "runs/list", query={"job_id": trabajos[0]["job_id"], "limit": 25}).get("runs", []) if trabajos else []
         checks.append(("Al menos una corrida exitosa", any(r.get("state", {}).get("result_state") == "SUCCESS" for r in runs)))
         con_reparacion = [

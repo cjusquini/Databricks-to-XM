@@ -57,6 +57,8 @@ def test_rama_condicional_y_parametros():
         tareas["hay_datos_nuevos"]["condition_task"]["left"] == "{{tasks.bronce.values.procesar}}"
     )
     assert tareas["calidad"]["depends_on"] == [{"task_key": "hay_datos_nuevos", "outcome": "true"}]
+    # Si chequeo dependiera solo de inferencia, Databricks lo excluiría junto con la rama false.
+    assert {d["task_key"] for d in tareas["chequeo"]["depends_on"]} == {"bronce", "inferencia"}
     assert {p["name"] for p in d["parameters"]} == set(PARAMETROS)
     assert next(p for p in d["parameters"] if p["name"] == "usuario")["default"] == "ana"
     assert d["email_notifications"]["on_failure"] == ["ana@x.co"]
