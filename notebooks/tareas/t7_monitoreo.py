@@ -70,15 +70,20 @@ cliente = mlflow.MlflowClient()
 spark.sql(batch.sql_vista_observado_vs_estimado(V_OBS, T_PRON, T_FEATURES))
 obs = spark.table(V_OBS).toPandas()
 diario = mon.error_diario(obs)
-spark.createDataFrame(diario.assign(fecha_pronostico=pd.to_datetime(diario["fecha_pronostico"]).dt.date)) \
-    .write.mode("overwrite").option("overwriteSchema", "true").saveAsTable(T_ERROR)
-hasta = pd.to_datetime(diario["fecha_pronostico"]).max()
-wape = {a: mon.wape_ventana(diario, a, hasta, M["ventana_reciente_dias"]) for a in ("champion", "challenger")}
-
 mv = cliente.get_model_version_by_alias(u["modelo"], "champion")
 lin = linaje(cliente, mv)
-print(f"observado hasta {hasta.date()} · WAPE {M['ventana_reciente_dias']} días: champion {wape['champion']:.2%}, "
-      f"challenger {wape['challenger']:.2%} · referencia (validación) {lin['wape_validacion']:.2%}")
+if diario.empty:
+    # Ambiente recién preparado (qa, prod): solo tiene pronósticos del futuro, aún sin demanda observada.
+    # No es un error: no hay nada que medir todavía. El drift sí se puede calcular.
+    wape = {"champion": float("nan"), "challenger": float("nan")}
+    print("Sin demanda observada para los pronósticos de este ambiente todavía: el error se medirá cuando llegue.")
+else:
+    spark.createDataFrame(diario.assign(fecha_pronostico=pd.to_datetime(diario["fecha_pronostico"]).dt.date)) \
+        .write.mode("overwrite").option("overwriteSchema", "true").saveAsTable(T_ERROR)
+    hasta = pd.to_datetime(diario["fecha_pronostico"]).max()
+    wape = {a: mon.wape_ventana(diario, a, hasta, M["ventana_reciente_dias"]) for a in ("champion", "challenger")}
+    print(f"observado hasta {hasta.date()} · WAPE {M['ventana_reciente_dias']} días: champion {wape['champion']:.2%}, "
+          f"challenger {wape['challenger']:.2%} · referencia (validación) {lin['wape_validacion']:.2%}")
 
 # COMMAND ----------
 
