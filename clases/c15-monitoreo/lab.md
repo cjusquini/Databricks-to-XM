@@ -1,6 +1,6 @@
 # Lab 15 — El modelo se monitorea, se reentrena y se promueve solo si gana
 
-**Duración:** 35 + 40 + 25 min · **Modalidad:** individual, en tu propio fork · **Rama:** `feature/c15-monitoreo`
+**Duración:** 25 + 30 + 10 min (después de cerrar el lab 14) · **Modalidad:** individual, en tu propio fork · **Rama:** `feature/c15-monitoreo`
 
 ## Objetivo
 
@@ -10,7 +10,7 @@ Medir el error observado (WAPE y sesgo, por día y segmento) y el drift de las e
 
 | Requisito | Si no lo tienes |
 |---|---|
-| Lab 14 completo (qa y prod en el mismo commit) | No bloquea este lab: todo se hace en dev |
+| Lab 14, parte 1 (PR fusionado y `deploy-dev` en verde) | La parte 2 (el tag a qa y prod) se hace al abrir esta sesión; no bloquea este lab: todo se hace en dev |
 | `demanda_7d@champion` en dev con su run (clase 9) | El monitor lee de ahí el WAPE de validación y la fecha de corte |
 | Git folder en `main` actualizado | GitHub: **Sync fork** → Databricks: Git → **Pull** |
 | Rama nueva | Git → Create branch → `feature/c15-monitoreo` |

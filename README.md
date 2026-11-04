@@ -144,7 +144,7 @@ Hitos (según el programa del curso): H1 pregunta analítica · H2 arquitectura 
 - **Sector:** qué debe cambiar entre ambientes en una solución de mercado (fuentes, permisos, frecuencias, identidad) y qué no debe cambiar nunca (código, DAG, contrato).
 - **Entregable:** bundle desplegado en `dev` y `qa`; `test_bundle.py` en CI.
 
-### Clase 14 — CI/CD y promoción entre ambientes (sesión 1, segunda mitad)
+### Clase 14 — CI/CD y promoción entre ambientes (sesión 1, segunda mitad; la promoción del tag a prod abre la sesión 2)
 - **Teoría:** CI, entrega continua y despliegue continuo; el pipeline como código y con pruebas; autenticación del pipeline (token, service principal, federación OIDC); compuertas: ruleset de `main` y *environments* con aprobación; prueba de integración en qa; trazabilidad del commit desplegado; promover código vs. promover modelos (*deploy code, not models*); GitHub Actions y Azure DevOps lado a lado.
 - **Práctica:** fork con secrets, variable, environments y ruleset; `deploy-prod` con `needs` y aprobación; un PR detenido por CI y un push directo rechazado; tag `v1.0.0` → qa (deploy + preparar + job diario) → aprobación → prod; auditoría desde Databricks (`git_sha`, `run_as`, última corrida).
 - **Sector:** auditabilidad del despliegue: quién aprobó, qué versión, cuándo, con qué identidad.

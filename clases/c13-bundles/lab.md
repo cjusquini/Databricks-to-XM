@@ -1,6 +1,6 @@
 # Lab 13 — El mismo código en dev y qa, desplegado con un bundle
 
-**Duración:** 50 min (con el notebook guiado) · **Modalidad:** individual, en tu propio fork · **Rama:** `feature/c13-bundles`
+**Duración:** 40 min (con el notebook guiado) · **Modalidad:** individual, en tu propio fork · **Rama:** `feature/c13-bundles`
 
 ## Objetivo
 

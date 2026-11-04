@@ -17,7 +17,8 @@
 # MAGIC ```
 # MAGIC
 # MAGIC Un `TODO`: `decidir_reentrenamiento()` en `src/xm_demanda/monitoreo/politica.py` (sección 4). Dos preguntas por escrito.
-# MAGIC Al final, el cierre del curso. Requiere el lab 14 completo y haber hecho **Pull** de `main` en tu Git folder.
+# MAGIC Al final, el cierre del curso. Requiere el lab 14 (la sesión abre con su paso e: el tag `v1.0.0` a qa y prod, en el
+# MAGIC notebook `lab14_cicd_promocion`) y haber hecho **Pull** de `main` en tu Git folder.
 
 # COMMAND ----------
 
