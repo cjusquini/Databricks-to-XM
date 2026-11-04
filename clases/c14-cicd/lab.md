@@ -1,6 +1,6 @@
 # Lab 14 — De un tag a producción, con pruebas y una aprobación
 
-**Duración:** 45 min + 20 min · **Modalidad:** individual, en tu propio fork · **Rama:** `feature/c14-cicd`
+**Duración:** 45 min en la sesión 1 + 15 min al abrir la sesión 2 · **Modalidad:** individual, en tu propio fork · **Rama:** `feature/c14-cicd`
 
 ## Objetivo
 
@@ -26,9 +26,9 @@ Abre `clases/c14-cicd/notebooks/lab14_cicd_promocion`. Widget `usuario`.
 | 4a | GitHub | PR que rompe `test_usuario_invalido` | `test` en rojo; merge bloqueado |
 | 4b–c | GitHub | Arreglar, push, merge | Checks en verde; `deploy-dev` en verde |
 | 4d | terminal o Git folder | `git push` directo a `main` | Rechazado por el ruleset |
-| 4e | GitHub | Tag `v1.0.0` | `deploy-qa` en verde (unos 8 min); `deploy-prod` en **Waiting** → *Review deployments* → **Approve** |
-| 4 | notebook | Auditoría de los tres jobs | `git_sha`, `run_as`, última corrida por ambiente |
-| 5 | notebook | Promover código vs. promover modelos | Modelo de prod con tag `origen` |
+| 4e · sesión 2 | GitHub | Tag `v1.0.0` | `deploy-qa` en verde (unos 8 min); `deploy-prod` en **Waiting** → *Review deployments* → **Approve** |
+| 4 · sesión 2 | notebook | Auditoría de los tres jobs | `git_sha`, `run_as`, última corrida por ambiente |
+| 5 · sesión 2 | notebook | Promover código vs. promover modelos | Modelo de prod con tag `origen` |
 | Preguntas | notebook | sin `needs`; quién aprueba en XM | — |
 | `verificar()` | notebook | 8 comprobaciones en OK | El commit ya es el del tag |
 

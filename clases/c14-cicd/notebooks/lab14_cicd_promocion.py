@@ -17,6 +17,10 @@
 # MAGIC Un `TODO`: el job `deploy-prod` en `.github/workflows/ci.yml` (sección 3). Dos preguntas por escrito. Requiere el lab 13
 # MAGIC completo, tu fork en GitHub **público** (las aprobaciones de *environments* en planes gratuitos solo existen en
 # MAGIC repositorios públicos) y Actions habilitado en el fork.
+# MAGIC
+# MAGIC **En dos partes.** Sesión 1: secciones 1 a 3 y los pasos a–d de la sección 4 (el pipeline prueba cada PR y despliega
+# MAGIC dev en cada merge). Sesión 2, al abrir: el paso e (el tag a qa y prod con la aprobación), la auditoría, la sección 5 y
+# MAGIC `verificar()`.
 
 # COMMAND ----------
 
@@ -139,9 +143,9 @@ print("pytest test_cicd →", codigo, "(0 = todo pasó)")
 # MAGIC | b | revierte el cambio en la misma rama, incluye el TODO de `deploy-prod`, push | `test`, `integration`, `validate` en verde; merge permitido |
 # MAGIC | c | merge del PR | `deploy-dev` en verde: el job `[dev …]` se redesplegó con el tag `git_sha` del merge |
 # MAGIC | d | `git push origin main` directo desde tu computador o desde el Git folder | rechazado: *protected branch*. Eso es "un merge que se salta CI", y no pasa |
-# MAGIC | e | `git tag v1.0.0` sobre `main` y `git push origin v1.0.0` (o **Releases** → *Draft a new release*) | `deploy-qa` corre (unos 8 min); luego `deploy-prod` queda en **Waiting**: *Review deployments* → **Approve** |
+# MAGIC | e · **sesión 2** | `git tag v1.0.0` sobre `main` y `git push origin v1.0.0` (o **Releases** → *Draft a new release*) | `deploy-qa` corre (unos 8 min); luego `deploy-prod` queda en **Waiting**: *Review deployments* → **Approve** |
 # MAGIC
-# MAGIC Mientras qa corre, abre en Databricks **Jobs & Pipelines**: vas a ver `[xm-demanda] diario · <usuario> · qa` ejecutándose
+# MAGIC **Sesión 2 · parte 2 del lab.** Lanza el tag al empezar la sesión. Mientras qa corre, abre en Databricks **Jobs & Pipelines**: vas a ver `[xm-demanda] diario · <usuario> · qa` ejecutándose
 # MAGIC **como tú**, lanzado por el pipeline. En Free Edition hay 5 tareas simultáneas por cuenta: si el grupo lanza a la vez,
 # MAGIC las corridas esperan en cola.
 
