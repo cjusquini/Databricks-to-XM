@@ -1,0 +1,83 @@
+# El job diario de la clase 12, ahora como recurso del bundle (antes: un diccionario en
+# src/xm_demanda/orquestacion/job.py creado por la Jobs API). tests/unit/test_bundle.py
+# comprueba que este YAML y job.py describen el mismo DAG y la misma política de fallas.
+resources:
+  jobs:
+    job_diario:
+      name: "[xm-demanda] diario · ${var.usuario} · ${bundle.target}"
+      description: "Ingesta → calidad → plata → oro → inferencia → chequeo de frescura (clases 4 a 12)"
+      tags:
+        iniciativa: xm-demanda
+        ambiente: ${bundle.target}
+        usuario: ${var.usuario}
+        git_sha: ${var.git_sha}
+      max_concurrent_runs: 1
+      queue:
+        enabled: true
+      schedule:
+        quartz_cron_expression: "0 0 6 * * ?"
+        timezone_id: America/Bogota
+        pause_status: PAUSED
+      email_notifications:
+        on_failure:
+          - ${workspace.current_user.userName}
+      parameters:
+        - name: usuario
+          default: ${var.usuario}
+        - name: ambiente
+          default: ${bundle.target}
+        # En producción: "{{job.start_time.iso_date}}". Aquí fijo, porque los datos son históricos.
+        - name: fecha_proceso
+          default: "2026-07-27"
+        - name: forzar
+          default: "no"
+        - name: umbral_cuarentena
+          default: "0.01"
+      tasks:
+        - task_key: bronce
+          notebook_task:
+            notebook_path: ../notebooks/tareas/t1_bronce.py
+          timeout_seconds: 1800
+        - task_key: hay_datos_nuevos
+          depends_on:
+            - task_key: bronce
+          condition_task:
+            op: EQUAL_TO
+            left: "{{tasks.bronce.values.procesar}}"
+            right: "si"
+        - task_key: calidad
+          depends_on:
+            - task_key: hay_datos_nuevos
+              outcome: "true"
+          notebook_task:
+            notebook_path: ../notebooks/tareas/t2_calidad.py
+          timeout_seconds: 1800
+        - task_key: plata
+          depends_on:
+            - task_key: calidad
+          notebook_task:
+            notebook_path: ../notebooks/tareas/t3_plata.py
+          timeout_seconds: 1800
+        - task_key: oro
+          depends_on:
+            - task_key: plata
+          notebook_task:
+            notebook_path: ../notebooks/tareas/t4_oro.py
+          timeout_seconds: 1800
+        - task_key: inferencia
+          depends_on:
+            - task_key: oro
+          notebook_task:
+            notebook_path: ../notebooks/tareas/t5_inferencia.py
+          max_retries: 2
+          min_retry_interval_millis: 60000
+          retry_on_timeout: true
+          timeout_seconds: 1800
+        - task_key: chequeo
+          depends_on:
+            - task_key: bronce
+            - task_key: inferencia
+          run_if: ALL_DONE
+          notebook_task:
+            notebook_path: ../notebooks/tareas/t6_chequeo.py
+          timeout_seconds: 600

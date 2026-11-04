@@ -1,5 +1,10 @@
-# Equivalente en Azure DevOps del flujo de .github/workflows/ci.yml (clase 14).
-# Referencia: no se ejecuta en el curso.
+# Equivalente en Azure DevOps de .github/workflows/ci.yml (clase 14). Referencia: no se ejecuta en el curso.
+#
+# Diferencias que importan en XM (Azure):
+#  - Autenticación: service connection de Azure Resource Manager con workload identity federation hacia
+#    un service principal de Entra ID por ambiente. Sin tokens guardados (ver AzureCLI@2 abajo).
+#  - Aprobaciones: se configuran en Pipelines → Environments → prod → Approvals and checks, no en el YAML.
+#  - Un workspace por ambiente: cada stage usa su propio host (variable group por ambiente).
 trigger:
   branches: { include: [main] }
   tags: { include: ["v*"] }
@@ -9,30 +14,41 @@ pr:
 pool: { vmImage: ubuntu-latest }
 
 variables:
-  - group: databricks-secrets   # DATABRICKS_HOST, DATABRICKS_TOKEN
+  BUNDLE_VAR_git_sha: $(Build.SourceVersion)   # mismo tag git_sha que en GitHub Actions
 
 stages:
-  - stage: Test
+  - stage: CI
     jobs:
       - job: test
         steps:
           - task: UsePythonVersion@0
             inputs: { versionSpec: "3.11" }
-          - script: pip install -e ".[dev,spark]" && ruff check . && pytest tests/unit && pytest tests/integration
+          - script: pip install -e ".[dev]" && ruff check . && pytest tests/unit
+      - job: integration
+        steps:
+          - task: UsePythonVersion@0
+            inputs: { versionSpec: "3.11" }
+          - script: pip install -e ".[dev,spark]" && pytest tests/integration -q
 
   - stage: DeployDev
-    dependsOn: Test
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+    dependsOn: CI
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    variables: [{ group: databricks-dev }]   # DATABRICKS_HOST del workspace de dev
     jobs:
-      - job: deploy
-        steps:
-          - script: curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
-          - script: databricks bundle deploy -t dev
-            env: { DATABRICKS_HOST: $(DATABRICKS_HOST), DATABRICKS_TOKEN: $(DATABRICKS_TOKEN) }
+      - deployment: dev
+        environment: dev
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - template: plantilla-bundle.yml
+                  parameters: { target: dev, correr: false }
 
   - stage: DeployQA
-    dependsOn: Test
-    condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
+    dependsOn: CI
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
+    variables: [{ group: databricks-qa }]
     jobs:
       - deployment: qa
         environment: qa
@@ -41,20 +57,20 @@ stages:
             deploy:
               steps:
                 - checkout: self
-                - script: curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
-                - script: databricks bundle deploy -t qa
-                  env: { DATABRICKS_HOST: $(DATABRICKS_HOST), DATABRICKS_TOKEN: $(DATABRICKS_TOKEN) }
+                - template: plantilla-bundle.yml
+                  parameters: { target: qa, correr: true }
 
   - stage: DeployProd
-    dependsOn: DeployQA
+    dependsOn: DeployQA                          # nunca prod sin qa
+    condition: succeeded()
+    variables: [{ group: databricks-prod }]
     jobs:
       - deployment: prod
-        environment: prod   # con aprobación manual en Azure DevOps Environments
+        environment: prod                        # Approvals and checks: aprobación manual
         strategy:
           runOnce:
             deploy:
               steps:
                 - checkout: self
-                - script: curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
-                - script: databricks bundle deploy -t prod
-                  env: { DATABRICKS_HOST: $(DATABRICKS_HOST), DATABRICKS_TOKEN: $(DATABRICKS_TOKEN) }
+                - template: plantilla-bundle.yml
+                  parameters: { target: prod, correr: true }

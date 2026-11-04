@@ -1,0 +1,24 @@
+# Prepara qa o prod a partir de dev: esquema, volumen, landing, dim_ciiu y modelo promovido.
+# Se corre una vez por ambiente (y en cada promoción de la clase 14). Idempotente.
+resources:
+  jobs:
+    preparar_ambiente:
+      name: "[xm-demanda] preparar ambiente · ${var.usuario} · ${bundle.target}"
+      tags:
+        iniciativa: xm-demanda
+        ambiente: ${bundle.target}
+        usuario: ${var.usuario}
+        git_sha: ${var.git_sha}
+      max_concurrent_runs: 1
+      parameters:
+        - name: usuario
+          default: ${var.usuario}
+        - name: ambiente
+          default: ${bundle.target}
+        - name: ambiente_origen
+          default: dev
+      tasks:
+        - task_key: preparar
+          notebook_task:
+            notebook_path: ../notebooks/tareas/t0_preparar_ambiente.py
+          timeout_seconds: 1800

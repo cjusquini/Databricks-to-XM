@@ -12,16 +12,21 @@ def _validar(cfg):
 
 def test_fqn_dev():
     cfg = load_config("dev")
-    assert fqn(cfg, "silver", "silver_diaria") == "dev.silver_energia.demanda_diaria"
+    assert fqn(cfg, "silver", "silver_diaria") == "workspace.silver_energia.demanda_diaria"
 
 
 @pytest.mark.parametrize("env", ["dev", "qa", "prod"])
 def test_solo_cambia_el_ambiente(env):
-    """Entre ambientes cambian catálogo y rutas; modelo y nombres de tablas son los mismos."""
+    """Entre ambientes cambia dónde (sufijo del esquema); modelo y nombres de tablas no cambian.
+
+    Clase 13: en Free Edition todos los ambientes viven en el catálogo workspace; en Azure cambiaría
+    catalog por ambiente y esta prueba diría cfg["catalog"] == env.
+    """
     base, cfg = load_config("dev"), load_config(env)
-    assert cfg["catalog"] == env
+    assert cfg["catalog"] == "workspace"
+    assert cfg["sufijo_esquema"] == ("" if env == "dev" else f"_{env}")
     assert cfg["modelo"] == base["modelo"] and cfg["tablas"] == base["tablas"]
-    assert cfg["volumen_landing"].startswith(f"/Volumes/{env}/")
+    assert "{esquema}" in cfg["volumen_landing"]
 
 
 @pytest.mark.parametrize("env", ["dev", "qa", "prod"])

@@ -1,3 +1,6 @@
-catalog: prod
-volumen_landing: /Volumes/prod/bronze_energia/landing
-experimento: /Shared/xm-demanda/prod
+# Ambiente prod. Free Edition: un catálogo (workspace) y un esquema por estudiante y ambiente.
+# En Azure Databricks: catalog: prod, en el workspace de prod. El código de las tareas no cambia.
+catalog: workspace
+sufijo_esquema: "_prod"
+volumen_landing: /Volumes/{catalogo}/{esquema}/raw/landing
+experimento: xm-demanda-prod
