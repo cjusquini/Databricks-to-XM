@@ -18,3 +18,16 @@ modelo:
   ventanas: [7, 28]
   alias_prod: champion
 llave_serie: [codigo_sic_agente, mercado_comercializacion, tipo_mercado, clasificacion_industrial]
+# Clase 15: cuándo alertar, cuándo reentrenar, cuándo promover. Umbrales de negocio, no de código.
+monitoreo:
+  ventana_reciente_dias: 7          # error "de ahora"
+  ventana_referencia_dias: 56       # contra qué se compara el drift
+  tolerancia_degradacion: 0.20      # reentrenar si WAPE reciente > WAPE de validación × 1,20
+  umbral_critico: 2.0               # la tarea falla (alerta) si WAPE reciente > 2 × referencia
+  psi_moderado: 0.10
+  psi_alto: 0.25
+  dias_max_sin_reentrenar: 28
+  columnas_drift: [demanda_real_kwh_rel, lag_7_rel, media_7_rel, desv_7_rel, es_festivo]
+promocion:
+  mejora_minima: 0.02               # el challenger debe bajar el WAPE al menos 2 % relativo
+  dias_minimos: 14                  # sobre al menos 14 días observados

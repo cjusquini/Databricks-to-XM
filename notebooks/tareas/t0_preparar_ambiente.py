@@ -70,6 +70,8 @@ print("dim_ciiu:", spark.table(f"{destino['fqn']}.dim_ciiu").count(), "filas")
 # 4 · Modelo: se promueve el artefacto (mismos pesos, mismo código empaquetado) con su linaje en un tag
 import mlflow
 
+from xm_demanda.monitoreo.linaje import linaje
+
 mlflow.set_registry_uri("databricks-uc")
 cliente = mlflow.MlflowClient()
 
@@ -95,5 +97,8 @@ for alias in ("champion", "challenger"):
         v = nueva.version
         cliente.set_model_version_tag(destino["modelo"], v, "origen", uri)
         cliente.set_model_version_tag(destino["modelo"], v, "promovido_por", "job preparar_ambiente")
+        for llave, valor in linaje(cliente, src).items():  # la copia hereda el linaje (clase 15)
+            if valor is not None and valor == valor:
+                cliente.set_model_version_tag(destino["modelo"], v, llave, str(valor))
     cliente.set_registered_model_alias(destino["modelo"], alias, v)
     print(f"{destino['modelo']}@{alias} → versión {v}  (copia de {uri})")

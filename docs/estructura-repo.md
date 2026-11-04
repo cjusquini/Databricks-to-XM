@@ -31,4 +31,4 @@ Databricks-to-XM/
 | 12 | `src/xm_demanda/orquestacion` (job como código, chequeo de frescura) |
 | 13 | `databricks.yml` con dev/qa/prod, `resources/job_diario.yml` y `job_preparar_ambiente.yml`, `notebooks/tareas/`, `src/xm_demanda/utils/ambiente.py`, `tests/unit/test_bundle.py` |
 | 14 | `.github/workflows/ci.yml` con deploy-dev/qa/prod, `ci/azure-pipelines.yml`, `tests/unit/test_cicd.py` |
-| 15 | notebook 06, `docs/runbook.md` |
+| 15 | `src/xm_demanda/monitoreo`, tareas t7–t9, `resources/job_reentrenamiento.yml`, umbrales en `conf/base.yml`, `docs/runbook.md`, `docs/backlog.md` |

@@ -63,7 +63,7 @@ El código de la solución vive fuera de las carpetas de clase (`src/`, `resourc
 | 12 | Operación | Orquestación con Lakeflow Jobs | DAGs, dependencias, reintentos, alertas, parámetros, triggers por archivo; integración con ADF/Airflow | Job multi-tarea ingesta→features→inferencia con notificaciones | H6 |
 | 13 | Operación | Bundles y ambientes (sesión 1) | Declarative Automation Bundles: targets, variables, modos, service principals; DEV/QA/PROD en Azure Databricks | `databricks.yml` con 3 targets, deploy a `dev` y `qa` desde el workspace | H6 |
 | 14 | Operación | CI/CD y promoción (sesión 1) | GitHub Actions y Azure DevOps; pruebas de integración; approvals; promoción de código y de modelos | Pipeline PR→tests→dev; tag→qa→aprobación→prod (`azure-pipelines.yml` de referencia) | H6 |
-| 15 | Operación | Monitoreo, drift, reentrenamiento y cierre | Monitoreo de datos y de modelo, drift, políticas de reentrenamiento, runbook, costos, SLOs; demo final | Monitor de drift observado vs. pronóstico; runbook; pipeline completo en verde de punta a punta | H6 ✔ |
+| 15 | Operación | Monitoreo, drift, reentrenamiento y cierre (sesión 2) | Monitoreo de datos y de modelo, drift, políticas de reentrenamiento, runbook, costos, SLOs | Monitor de error y drift en el job; reentrenamiento con promoción por regla; alerta y runbook | H6 ✔ |
 
 Hitos (según el programa del curso): H1 pregunta analítica · H2 arquitectura y fuentes · H3 gobierno, permisos y calidad · H4 pipeline y Gold · H5 modelo, experimento y despliegue · H6 operación, CI/CD y consumo.
 
@@ -150,10 +150,10 @@ Hitos (según el programa del curso): H1 pregunta analítica · H2 arquitectura 
 - **Sector:** auditabilidad del despliegue: quién aprobó, qué versión, cuándo, con qué identidad.
 - **Entregable:** CI/CD operando sobre el propio fork, con qa y prod en el mismo commit.
 
-### Clase 15 — Monitoreo, drift, reentrenamiento y cierre
-- **Teoría:** monitoreo de datos (frescura, volumen, distribución) y de modelo (error observado vs. pronóstico, drift); políticas de reentrenamiento (calendario, por drift, por evento); runbook y dueños; costos y SLOs; tablero AI/BI y espacio Genie para negocio.
-- **Práctica:** monitor de drift sobre `pronostico_demanda` vs. real; política de reentrenamiento en el job; runbook; ejecución completa del pipeline en el propio fork; demo de la solución de referencia; backlog post-curso.
-- **Sector:** cambios estructurales que degradan un modelo de demanda: El Niño, autogeneración solar, nuevas cargas industriales, cambios regulatorios; cómo se detectan antes de que el negocio los note.
+### Clase 15 — Monitoreo, drift, reentrenamiento y cierre (sesión 2)
+- **Teoría:** qué se monitorea (sistema, datos, entradas del modelo, desempeño) y en qué orden avisa cada capa; *Data quality monitoring* (anomaly detection y data profiling, antes Lakehouse Monitoring); WAPE y sesgo observados por segmento; drift con PSI sobre features sin escala; políticas de reentrenamiento (degradación, drift, calendario, evento) como código; reentrenar no es promover: comparación sin fuga y regla de promoción con evidencia y margen; alertas SQL, SLOs, runbook y costos.
+- **Práctica:** `src/xm_demanda/monitoreo` con tests (`decidir_reentrenamiento()` como TODO); tareas `monitoreo`, `hay_que_reentrenar` y `reentrenar` (`run_job_task`) en el job diario; job `reentrenamiento` (entrenar → evaluar y promover) lanzado por evento; `decisiones_modelo` como registro auditable; alerta SQL; runbook con dueños; cierre del curso y backlog.
+- **Sector:** cambios estructurales que degradan un modelo de demanda: El Niño (2023–2024), el crecimiento de la demanda en 2026, autogeneración solar, nuevas cargas industriales, cambios regulatorios; cómo se detectan antes de que el negocio los note.
 - **Entregable:** solución completa operando en el propio fork. Hito 6 cerrado.
 
 ---

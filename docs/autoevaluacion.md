@@ -33,7 +33,7 @@ Rutas que cambian en cada clase (lo demás del diff es ruido):
 | 12 | `s12` | `src/xm_demanda/orquestacion clases/c12-jobs/notebooks` |
 | 13 | `s13` | `databricks.yml resources notebooks/tareas src/xm_demanda/utils conf` |
 | 14 | `s14` | `.github/workflows ci tests/unit/test_cicd.py` |
-| 15 | `s15` | `docs/runbook.md docs/architecture.md` |
+| 15 | `s15` | `src/xm_demanda/monitoreo notebooks/tareas resources conf/base.yml docs/runbook.md` |
 
 No hay una única respuesta correcta; sí hay decisiones sin justificar. Compara el porqué, no el qué.
 

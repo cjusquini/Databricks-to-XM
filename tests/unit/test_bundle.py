@@ -66,8 +66,8 @@ def test_yaml_y_job_py_describen_el_mismo_dag():
     except NotImplementedError:
         pytest.skip("Pendiente: lab 12, sección 3 (politica)")
     esperado = {t["task_key"]: t for t in definicion["tasks"]}
-    yaml_tareas = {t["task_key"]: t for t in JOB["tasks"]}
-    assert list(yaml_tareas) == jobdef.TAREAS
+    yaml_tareas = {t["task_key"]: t for t in JOB["tasks"][: len(jobdef.TAREAS)]}
+    assert list(yaml_tareas) == jobdef.TAREAS, "las 7 tareas de la clase 12, en orden, al inicio"
     for k, t in yaml_tareas.items():
         assert t.get("depends_on", []) == esperado[k].get("depends_on", []), k
         for llave in POLITICA:
@@ -98,3 +98,17 @@ def test_cada_notebook_existe():
     assert rutas
     for r in rutas:
         assert (RAIZ / "resources" / r).resolve().exists(), r
+
+
+def test_monitoreo_y_reentrenamiento_en_el_job():
+    tareas = {t["task_key"]: t for t in JOB["tasks"]}
+    if "monitoreo" not in tareas:
+        pytest.skip("Clase 15")
+    assert tareas["monitoreo"]["depends_on"] == [{"task_key": "chequeo"}], "solo lo publicable"
+    condicion = tareas["hay_que_reentrenar"]["condition_task"]
+    assert condicion["left"] == "{{tasks.monitoreo.values.reentrenar}}"
+    rama = [{"task_key": "hay_que_reentrenar", "outcome": "true"}]
+    assert tareas["reentrenar"]["depends_on"] == rama
+    assert tareas["reentrenar"]["run_job_task"]["job_id"] == "${resources.jobs.reentrenamiento.id}"
+    reent = _yaml("resources/job_reentrenamiento.yml")["resources"]["jobs"]["reentrenamiento"]
+    assert [t["task_key"] for t in reent["tasks"]] == ["entrenar", "evaluar_promover"]
