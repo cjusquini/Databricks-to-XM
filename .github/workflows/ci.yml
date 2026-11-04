@@ -86,13 +86,14 @@ jobs:
       # Prueba de integración: el job completo en qa. Si el chequeo falla, el tag no llega a prod.
       - run: databricks bundle run job_diario -t qa
 
-  # TODO (lab 14, sección 3): deploy-prod. Igual a deploy-qa pero hacia prod, y con dos cosas
-  # que lo hacen seguro: (1) solo corre si deploy-qa terminó bien y (2) espera una aprobación
-  # humana (environment prod con Required reviewers). Sin ellas, un tag llega a prod sin pasar por qa.
   deploy-prod:
     if: startsWith(github.ref, 'refs/tags/v') && vars.DATABRICKS_DEPLOY == 'true'
+    needs: deploy-qa
     runs-on: ubuntu-latest
+    environment: prod   # Required reviewers en GitHub: alguien aprueba antes de este paso
     steps:
       - uses: actions/checkout@v4
       - uses: databricks/setup-cli@main
       - run: databricks bundle deploy -t prod
+      - run: databricks bundle run preparar_ambiente -t prod
+      - run: databricks bundle run job_diario -t prod

@@ -23,8 +23,12 @@ def esquema_de(usuario: str, ambiente: str, sufijo: str) -> str:
     Ejemplos: esquema_de(" Ana ", "dev", "") == "c01_ana";
     esquema_de("ana", "qa", "_qa") == "c01_ana_qa"; esquema_de("ana", "staging", "") → ValueError.
     """
-    # TODO (lab 13, sección 2): validar ambiente y usuario, y devolver c01_<usuario><sufijo>.
-    raise NotImplementedError("esquema_de: completa esta función (lab 13, sección 2)")
+    if ambiente not in AMBIENTES:
+        raise ValueError(f"Ambiente desconocido: {ambiente!r}. Usa uno de {AMBIENTES}")
+    u = usuario.strip().lower()
+    if not PATRON_USUARIO.match(u):
+        raise ValueError(f"Usuario inválido: {usuario!r}. Minúsculas, números y _, sin espacios")
+    return f"c01_{u}{sufijo}"
 
 
 def ubicacion(usuario: str, ambiente: str) -> dict:

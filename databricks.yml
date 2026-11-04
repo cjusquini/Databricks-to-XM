@@ -25,7 +25,7 @@ sync:
 variables:
   usuario:
     description: Sufijo de tu esquema c01_<usuario>. En tu fork, ponle default (lab 13, sección 4).
-    # TODO (lab 13, sección 4): default: <tu usuario>. Sin valor, el deploy falla a propósito.
+    default: docente
   git_sha:
     description: Commit desplegado. Lo llena CI/CD (clase 14); en un deploy manual queda "manual".
     default: manual
@@ -37,8 +37,17 @@ targets:
     mode: development
     default: true
 
-  # TODO (lab 13, sección 5): el target qa. Igual a prod (modo producción, root_path fijo,
-  # run_as y permissions explícitos): qa existe para probar exactamente lo que irá a producción.
+  # qa: copia fiel de producción para probar la promoción. Modo producción: sin prefijos,
+  # con permisos y run_as explícitos, y una sola copia desplegada (root_path fijo).
+  qa:
+    mode: production
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
+    run_as:
+      user_name: ${workspace.current_user.userName}
+    permissions:
+      - user_name: ${workspace.current_user.userName}
+        level: CAN_MANAGE
 
   prod:
     mode: production
