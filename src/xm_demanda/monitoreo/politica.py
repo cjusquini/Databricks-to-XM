@@ -5,6 +5,7 @@ decide. Estas dos funciones sí. Las usan las tareas de monitoreo y de reentrena
 sus umbrales viven en conf/base.yml (monitoreo, promocion), no en el código.
 """
 
+import math
 
 
 def decidir_reentrenamiento(
@@ -24,8 +25,23 @@ def decidir_reentrenamiento(
     Ejemplo: decidir_reentrenamiento(0.07, 0.05, 0.05, 10, U) →
     {"reentrenar": True, "motivos": ["degradación: WAPE 7.0 % vs. 5.0 % de referencia (+40 %)"]}
     """
-    # TODO (lab 15, sección 4): tres disparadores independientes; un nan no dispara nada.
-    raise NotImplementedError("decidir_reentrenamiento: completa esta función (lab 15, sección 4)")
+    motivos = []
+    tol = umbrales["tolerancia_degradacion"]
+    if not math.isnan(wape_reciente) and not math.isnan(wape_referencia):
+        if wape_reciente > wape_referencia * (1 + tol):
+            cambio = wape_reciente / wape_referencia - 1
+            motivos.append(
+                f"degradación: WAPE {wape_reciente:.1%} vs. {wape_referencia:.1%} de referencia "
+                f"(+{cambio:.0%})"
+            )
+    if not math.isnan(psi_max) and psi_max >= umbrales["psi_alto"]:
+        motivos.append(f"drift: PSI máximo {psi_max:.2f} ≥ {umbrales['psi_alto']:.2f}")
+    if dias_desde_entrenamiento >= umbrales["dias_max_sin_reentrenar"]:
+        motivos.append(
+            f"calendario: {dias_desde_entrenamiento} días desde el entrenamiento "
+            f"(máximo {umbrales['dias_max_sin_reentrenar']})"
+        )
+    return {"reentrenar": bool(motivos), "motivos": motivos}
 
 
 def decidir_promocion(
