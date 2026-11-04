@@ -1,35 +1,53 @@
-# Declarative Automation Bundle (Databricks Asset Bundle) del producto analítico "xm-demanda".
-# Un solo workspace (Free Edition): los ambientes se simulan con catálogos distintos.
-# En Azure Databricks cada target apuntaría a un workspace diferente; el resto no cambia.
+# Declarative Automation Bundle (antes Databricks Asset Bundle) del producto "xm-demanda".
+# Un bundle = el código (src/, notebooks/) + los recursos que lo ejecutan (resources/*.yml)
+# + los ambientes a los que se despliega (targets). Se despliega igual desde el workspace
+# (panel Deployments), desde la CLI (databricks bundle deploy -t qa) o desde CI/CD (clase 14).
+#
+# Free Edition: un solo workspace; los ambientes son esquemas: c01_<usuario>, _qa y _prod.
+# Azure Databricks: cada target apuntaría a su workspace (workspace.host) y correría como
+# un service principal (run_as.service_principal_name). Lo demás no cambia.
 bundle:
   name: xm-demanda
 
 include:
   - resources/*.yml
 
+# Qué viaja al workspace en cada deploy: el código y lo que el código lee. El material de
+# clase, los datos crudos y los tests se quedan en el repo.
+sync:
+  exclude:
+    - clases/**
+    - data/raw/**
+    - docs/**
+    - tests/**
+    - app/**
+
 variables:
-  catalog:
-    description: Catálogo de Unity Catalog para el ambiente
-    default: dev
-  horizon_days:
-    description: Horizonte de pronóstico en días
-    default: 7
-  notification_email:
-    description: Correo para alertas de jobs
-    default: ""
+  usuario:
+    description: Sufijo de tu esquema c01_<usuario>. En tu fork, ponle default (lab 13, sección 4).
+    # TODO (lab 13, sección 4): default: <tu usuario>. Sin valor, el deploy falla a propósito.
+  git_sha:
+    description: Commit desplegado. Lo llena CI/CD (clase 14); en un deploy manual queda "manual".
+    default: manual
 
 targets:
+  # dev: tu espacio de trabajo. Nombres con prefijo [dev <tu usuario>], calendarios en pausa,
+  # y desde el workspace corre directamente sobre los archivos de tu Git folder.
   dev:
     mode: development
     default: true
-    variables:
-      catalog: dev
-  qa:
-    mode: production
-    variables:
-      catalog: qa
+
+  # TODO (lab 13, sección 5): el target qa. Igual a prod (modo producción, root_path fijo,
+  # run_as y permissions explícitos): qa existe para probar exactamente lo que irá a producción.
+
   prod:
     mode: production
-    variables:
-      catalog: prod
-    # En Azure: workspace.host del workspace de producción y run_as con service principal.
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
+    run_as:
+      user_name: ${workspace.current_user.userName}
+      # En Azure: service_principal_name: <application-id del SP de producción>
+    permissions:
+      - user_name: ${workspace.current_user.userName}
+        level: CAN_MANAGE
+      # En Azure: - group_name: analitica-xm-operacion   level: CAN_VIEW

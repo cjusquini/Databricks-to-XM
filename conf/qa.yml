@@ -1,3 +1,6 @@
-catalog: qa
-volumen_landing: /Volumes/qa/bronze_energia/landing
-experimento: /Shared/xm-demanda/qa
+# Ambiente qa. Free Edition: un catálogo (workspace) y un esquema por estudiante y ambiente.
+# En Azure Databricks: catalog: qa, en el workspace de qa. El código de las tareas no cambia.
+catalog: workspace
+sufijo_esquema: "_qa"
+volumen_landing: /Volumes/{catalogo}/{esquema}/raw/landing
+experimento: xm-demanda-qa

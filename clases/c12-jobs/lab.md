@@ -61,7 +61,7 @@ git diff s12 -- src/xm_demanda/orquestacion clases/c12-jobs/notebooks
 
 ## Para la clase 13
 
-Instala la CLI de Databricks (`brew install databricks/tap/databricks` o el instalador de la [documentación](https://docs.databricks.com/aws/en/dev-tools/cli/install)) y autentícate con `databricks auth login --host <url de tu workspace>`. El job de hoy se convierte en `resources/job_diario.yml`.
+Haz **Sync fork** y **Pull** antes de clase. Los bundles se despliegan desde el propio workspace (panel **Deployments**), así que no hace falta instalar nada. Si quieres usar también la CLI de Databricks, instálala con el instalador de la [documentación](https://docs.databricks.com/aws/en/dev-tools/cli/install) y autentícate con `databricks auth login --host <url de tu workspace>`. El job de hoy se convierte en `resources/job_diario.yml`.
 
 ## Así sería en Azure Databricks
 

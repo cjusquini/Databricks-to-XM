@@ -1,0 +1,27 @@
+# Pasos comunes de despliegue de un target del bundle (usado por azure-pipelines.yml).
+parameters:
+  - name: target
+    type: string
+  - name: correr
+    type: boolean
+    default: false
+
+steps:
+  - script: curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+    displayName: Instalar la CLI de Databricks
+  - task: AzureCLI@2
+    displayName: bundle deploy -t ${{ parameters.target }}
+    inputs:
+      azureSubscription: sc-databricks-${{ parameters.target }}   # service connection con federación
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        export DATABRICKS_AUTH_TYPE=azure-cli
+        databricks bundle validate -t ${{ parameters.target }}
+        databricks bundle deploy -t ${{ parameters.target }}
+        if [ "${{ parameters.correr }}" = "True" ]; then
+          databricks bundle run preparar_ambiente -t ${{ parameters.target }}
+          databricks bundle run job_diario -t ${{ parameters.target }}
+        fi
+    env:
+      DATABRICKS_HOST: $(DATABRICKS_HOST)
