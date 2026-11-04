@@ -1,11 +1,13 @@
 # El job diario de la clase 12, ahora como recurso del bundle (antes: un diccionario en
 # src/xm_demanda/orquestacion/job.py creado por la Jobs API). tests/unit/test_bundle.py
 # comprueba que este YAML y job.py describen el mismo DAG y la misma política de fallas.
+# Clase 15: después del chequeo, el monitoreo decide si hay que reentrenar; si sí, lanza
+# el job de reentrenamiento (run_job_task) y sigue su resultado.
 resources:
   jobs:
     job_diario:
       name: "[xm-demanda] diario · ${var.usuario} · ${bundle.target}"
-      description: "Ingesta → calidad → plata → oro → inferencia → chequeo de frescura (clases 4 a 12)"
+      description: "Ingesta → calidad → plata → oro → inferencia → chequeo → monitoreo (clases 4 a 15)"
       tags:
         iniciativa: xm-demanda
         ambiente: ${bundle.target}
@@ -81,3 +83,26 @@ resources:
           notebook_task:
             notebook_path: ../notebooks/tareas/t6_chequeo.py
           timeout_seconds: 600
+        - task_key: monitoreo
+          depends_on:
+            - task_key: chequeo
+          notebook_task:
+            notebook_path: ../notebooks/tareas/t7_monitoreo.py
+          timeout_seconds: 1200
+        - task_key: hay_que_reentrenar
+          depends_on:
+            - task_key: monitoreo
+          condition_task:
+            op: EQUAL_TO
+            left: "{{tasks.monitoreo.values.reentrenar}}"
+            right: "si"
+        - task_key: reentrenar
+          depends_on:
+            - task_key: hay_que_reentrenar
+              outcome: "true"
+          run_job_task:
+            job_id: ${resources.jobs.reentrenamiento.id}
+            job_parameters:
+              usuario: ${var.usuario}
+              ambiente: ${bundle.target}
+              motivo: "{{tasks.monitoreo.values.motivos}}"
