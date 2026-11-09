@@ -8,7 +8,7 @@ Databricks-to-XM/
 ├── resources/                 Definiciones del bundle (pipeline, jobs)
 ├── conf/                      Configuración por ambiente, sin secretos
 ├── src/xm_demanda/            Paquete Python con la lógica (ingest, quality, features, model, utils)
-├── notebooks/                 Notebooks delgados, uno por tarea de job
+├── notebooks/tareas/          Notebooks delgados, uno por tarea de job (t0 preparar … t6 chequeo)
 ├── tests/unit | integration   pytest
 ├── app/                       Databricks App (Streamlit)
 ├── .github/workflows/ci.yml   CI/CD con GitHub Actions
@@ -25,8 +25,10 @@ Databricks-to-XM/
 |---|---|
 | 1–2 | `docs/architecture.md`, ADR-001, primera tabla Delta |
 | 3 | `docs/governance.md`, catálogos y grants |
-| 4–7 | `src/xm_demanda/ingest`, `quality`, `features`; notebooks 01–03; `resources/pipeline_silver.yml` |
+| 4–7 | `src/xm_demanda/ingest`, `quality`, `features` |
 | 8 | `validar_config`, contrato de oro como código, `tests/integration` con Spark, job `integration` en CI, el PR que debe fallar |
-| 9–11 | `src/xm_demanda/model`; notebooks 04–05; `app/` |
-| 12–14 | `resources/job_inference.yml`, `databricks.yml` completo, CI/CD |
-| 15 | notebook 06, `docs/runbook.md` |
+| 9–11 | `src/xm_demanda/model`, `inference`; `app/` |
+| 12 | `src/xm_demanda/orquestacion` (job como código, chequeo de frescura) |
+| 13 | `databricks.yml` con dev/qa/prod, `resources/job_diario.yml` y `job_preparar_ambiente.yml`, `notebooks/tareas/`, `src/xm_demanda/utils/ambiente.py`, `tests/unit/test_bundle.py` |
+| 14 | `.github/workflows/ci.yml` con deploy-dev/qa/prod, `ci/azure-pipelines.yml`, `tests/unit/test_cicd.py` |
+| 15 | `src/xm_demanda/monitoreo`, tareas t7–t9, `resources/job_reentrenamiento.yml`, umbrales en `conf/base.yml`, `docs/runbook.md`, `docs/backlog.md` |

@@ -61,9 +61,9 @@ El código de la solución vive fuera de las carpetas de clase (`src/`, `resourc
 | 10 | MLOps | Registro, versiones y entrenamiento reproducible | Model Registry en UC, alias champion/challenger, firmas, lineage modelo↔datos; "deploy code, not models" | `train.py` parametrizado, registro en UC, promoción por alias | H5 |
 | 11 | MLOps | Inferencia batch, Serving y Apps | Cuándo batch, cuándo endpoint, cuándo app; Model Serving, AI Gateway, Databricks Apps, Genie y AI/BI | Job de inferencia batch a Gold; endpoint CPU; app observado vs. estimado | H5 ✔ |
 | 12 | Operación | Orquestación con Lakeflow Jobs | DAGs, dependencias, reintentos, alertas, parámetros, triggers por archivo; integración con ADF/Airflow | Job multi-tarea ingesta→features→inferencia con notificaciones | H6 |
-| 13 | Operación | Asset Bundles y ambientes | Declarative Automation Bundles: targets, variables, service principals; DEV/QA/PROD en Azure Databricks | `databricks.yml` con 3 targets, deploy a `qa` desde CLI | H6 |
-| 14 | Operación | CI/CD y promoción entre ambientes | GitHub Actions y Azure DevOps; pruebas de integración; approvals; promoción de código y de modelos | Pipeline PR→tests→dev; tag→qa→aprobación→prod (`azure-pipelines.yml` de referencia) | H6 |
-| 15 | Operación | Monitoreo, drift, reentrenamiento y cierre | Monitoreo de datos y de modelo, drift, políticas de reentrenamiento, runbook, costos, SLOs; demo final | Monitor de drift observado vs. pronóstico; runbook; pipeline completo en verde de punta a punta | H6 ✔ |
+| 13 | Operación | Bundles y ambientes (sesión 1) | Declarative Automation Bundles: targets, variables, modos, service principals; DEV/QA/PROD en Azure Databricks | `databricks.yml` con 3 targets, deploy a `dev` y `qa` desde el workspace | H6 |
+| 14 | Operación | CI/CD y promoción (sesión 1) | GitHub Actions y Azure DevOps; pruebas de integración; approvals; promoción de código y de modelos | Pipeline PR→tests→dev; tag→qa→aprobación→prod (`azure-pipelines.yml` de referencia) | H6 |
+| 15 | Operación | Monitoreo, drift, reentrenamiento y cierre (sesión 2) | Monitoreo de datos y de modelo, drift, políticas de reentrenamiento, runbook, costos, SLOs | Monitor de error y drift en el job; reentrenamiento con promoción por regla; alerta y runbook | H6 ✔ |
 
 Hitos (según el programa del curso): H1 pregunta analítica · H2 arquitectura y fuentes · H3 gobierno, permisos y calidad · H4 pipeline y Gold · H5 modelo, experimento y despliegue · H6 operación, CI/CD y consumo.
 
@@ -131,28 +131,29 @@ Hitos (según el programa del curso): H1 pregunta analítica · H2 arquitectura 
 - **Sector:** el pronóstico como servicio interno (AEMO, Octopus Energy en la plataforma de energía de Databricks); qué consumidores tiene en XM (planeación, seguimiento, gerencia, simulación) y qué canal necesita cada uno.
 - **Entregable:** tabla de pronósticos, vista observado vs. estimado, endpoint consultado y app leyendo la vista. Hito 5 cerrado.
 
-### Clase 12 — Orquestación con Lakeflow Jobs
-- **Teoría:** jobs multi-tarea, dependencias, parámetros, reintentos, timeouts, notificaciones; triggers por calendario y por llegada de archivo; concurrencia; cuándo integrar Azure Data Factory o Airflow y cuándo no.
-- **Práctica:** job `ingesta → calidad → features → inferencia` con alertas; una tarea que falla en silencio se diagnostica desde la UI y los logs.
+### Clase 12 — Orden del lakehouse, Genie y orquestación con Lakeflow Jobs
+- **Apertura:** cómo ordenar catálogos, esquemas y objetos en Unity Catalog según el consumidor (tablero, app, batch, endpoint), dónde viven los modelos y los experimentos de MLflow, y por qué el código del proyecto va en `src/`. Genie como consumidor más sobre la capa curada.
+- **Teoría:** jobs multi-tarea, dependencias, parámetros, task values, tareas condicionales (If/else), reintentos, timeouts, `run_if`, notificaciones; triggers por calendario y por llegada de archivo; cola y concurrencia; Repair run; cuándo integrar Azure Data Factory o Airflow y cuándo no.
+- **Práctica:** el job diario `bronce → hay_datos_nuevos → calidad → plata → oro → inferencia → chequeo` se define como código (`src/xm_demanda/orquestacion`), se crea por API y se ejecuta; una falla silenciosa (todo en verde con datos viejos) se vuelve visible con el chequeo de frescura y se resuelve con Repair run cuando llega el archivo tarde.
 - **Sector:** alinear el job al ciclo real de publicación de datos del mercado; qué pasa con el pronóstico cuando la fuente llega tarde.
-- **Entregable:** job programado con notificaciones. Hito 6 abierto.
+- **Entregable:** `politica()` implementada y job creado con notificaciones. Hito 6 abierto.
 
-### Clase 13 — Asset Bundles y ambientes
-- **Teoría:** Declarative Automation Bundles (Databricks Asset Bundles): estructura, targets, variables, recursos; service principals por ambiente; DEV/QA/PROD en Azure Databricks (workspaces separados) vs. su simulación con catálogos en Free Edition.
-- **Práctica:** `databricks.yml` con targets `dev/qa/prod`; deploy a `qa` desde la CLI; un deploy con variable faltante.
-- **Sector:** qué debe cambiar entre ambientes en una solución de mercado (fuentes, permisos, frecuencias) y qué no debe cambiar nunca (código).
-- **Entregable:** bundle desplegado en `dev` y `qa`.
+### Clase 13 — Declarative Automation Bundles y ambientes (sesión 1, primera mitad)
+- **Teoría:** Declarative Automation Bundles (antes Databricks Asset Bundles): `bundle`, `include`, `variables`, `targets`, `sync`, sustituciones; modos `development` y `production`; tres formas de desplegar (panel Deployments del workspace, CLI, CI/CD); qué cambia entre ambientes y qué no; DEV/QA/PROD en Azure Databricks (un workspace y un catálogo por ambiente, *workspace-catalog binding*, service principals) frente a su simulación con esquemas en Free Edition; Terraform para la plataforma, bundles para el producto.
+- **Práctica:** el job de la clase 12 como `resources/job_diario.yml` con tareas parametrizadas por `ambiente`; `esquema_de()` con tests; un deploy que falla por una variable sin valor; deploy a `dev` y a `qa` desde el workspace; `preparar_ambiente` siembra qa (landing, `DEEP CLONE` de `dim_ciiu`, `copy_model_version`); qa reproduce el pronóstico de dev con sus propias tablas.
+- **Sector:** qué debe cambiar entre ambientes en una solución de mercado (fuentes, permisos, frecuencias, identidad) y qué no debe cambiar nunca (código, DAG, contrato).
+- **Entregable:** bundle desplegado en `dev` y `qa`; `test_bundle.py` en CI.
 
-### Clase 14 — CI/CD y promoción entre ambientes
-- **Teoría:** pipelines de CI (lint, tests, validate) y CD (deploy por ambiente con approvals); GitHub Actions y Azure DevOps lado a lado; pruebas de integración en `dev`; promoción de código y de modelos; secretos en CI.
-- **Práctica:** pipeline PR→tests→deploy dev; tag→deploy qa→aprobación→prod; un merge que se salta CI. `azure-pipelines.yml` equivalente como referencia.
-- **Sector:** auditabilidad del despliegue: quién aprobó, qué versión, cuándo.
-- **Entregable:** CI/CD operando sobre el propio fork.
+### Clase 14 — CI/CD y promoción entre ambientes (sesión 1, segunda mitad; la promoción del tag a prod abre la sesión 2)
+- **Teoría:** CI, entrega continua y despliegue continuo; el pipeline como código y con pruebas; autenticación del pipeline (token, service principal, federación OIDC); compuertas: ruleset de `main` y *environments* con aprobación; prueba de integración en qa; trazabilidad del commit desplegado; promover código vs. promover modelos (*deploy code, not models*); GitHub Actions y Azure DevOps lado a lado.
+- **Práctica:** fork con secrets, variable, environments y ruleset; `deploy-prod` con `needs` y aprobación; un PR detenido por CI y un push directo rechazado; tag `v1.0.0` → qa (deploy + preparar + job diario) → aprobación → prod; auditoría desde Databricks (`git_sha`, `run_as`, última corrida).
+- **Sector:** auditabilidad del despliegue: quién aprobó, qué versión, cuándo, con qué identidad.
+- **Entregable:** CI/CD operando sobre el propio fork, con qa y prod en el mismo commit.
 
-### Clase 15 — Monitoreo, drift, reentrenamiento y cierre
-- **Teoría:** monitoreo de datos (frescura, volumen, distribución) y de modelo (error observado vs. pronóstico, drift); políticas de reentrenamiento (calendario, por drift, por evento); runbook y dueños; costos y SLOs; tablero AI/BI y espacio Genie para negocio.
-- **Práctica:** monitor de drift sobre `pronostico_demanda` vs. real; política de reentrenamiento en el job; runbook; ejecución completa del pipeline en el propio fork; demo de la solución de referencia; backlog post-curso.
-- **Sector:** cambios estructurales que degradan un modelo de demanda: El Niño, autogeneración solar, nuevas cargas industriales, cambios regulatorios; cómo se detectan antes de que el negocio los note.
+### Clase 15 — Monitoreo, drift, reentrenamiento y cierre (sesión 2)
+- **Teoría:** qué se monitorea (sistema, datos, entradas del modelo, desempeño) y en qué orden avisa cada capa; *Data quality monitoring* (anomaly detection y data profiling, antes Lakehouse Monitoring); WAPE y sesgo observados por segmento; drift con PSI sobre features sin escala; políticas de reentrenamiento (degradación, drift, calendario, evento) como código; reentrenar no es promover: comparación sin fuga y regla de promoción con evidencia y margen; alertas SQL, SLOs, runbook y costos.
+- **Práctica:** `src/xm_demanda/monitoreo` con tests (`decidir_reentrenamiento()` como TODO); tareas `monitoreo`, `hay_que_reentrenar` y `reentrenar` (`run_job_task`) en el job diario; job `reentrenamiento` (entrenar → evaluar y promover) lanzado por evento; `decisiones_modelo` como registro auditable; alerta SQL; runbook con dueños; cierre del curso y backlog.
+- **Sector:** cambios estructurales que degradan un modelo de demanda: El Niño (2023–2024), el crecimiento de la demanda en 2026, autogeneración solar, nuevas cargas industriales, cambios regulatorios; cómo se detectan antes de que el negocio los note.
 - **Entregable:** solución completa operando en el propio fork. Hito 6 cerrado.
 
 ---

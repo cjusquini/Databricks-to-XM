@@ -1,0 +1,38 @@
+# Clase 15: entrenar un candidato con los datos del ambiente y promoverlo solo si gana.
+# Lo lanza el job diario cuando el monitoreo lo pide, o una persona ante un evento
+# (cambio regulatorio, nueva carga industrial, fenómeno de El Niño declarado).
+resources:
+  jobs:
+    reentrenamiento:
+      name: "[xm-demanda] reentrenamiento · ${var.usuario} · ${bundle.target}"
+      tags:
+        iniciativa: xm-demanda
+        ambiente: ${bundle.target}
+        usuario: ${var.usuario}
+        git_sha: ${var.git_sha}
+      max_concurrent_runs: 1
+      queue:
+        enabled: true
+      email_notifications:
+        on_failure:
+          - ${workspace.current_user.userName}
+        on_success:
+          - ${workspace.current_user.userName}
+      parameters:
+        - name: usuario
+          default: ${var.usuario}
+        - name: ambiente
+          default: ${bundle.target}
+        - name: motivo
+          default: manual
+      tasks:
+        - task_key: entrenar
+          notebook_task:
+            notebook_path: ../notebooks/tareas/t8_entrenar.py
+          timeout_seconds: 3600
+        - task_key: evaluar_promover
+          depends_on:
+            - task_key: entrenar
+          notebook_task:
+            notebook_path: ../notebooks/tareas/t9_evaluar_promover.py
+          timeout_seconds: 1800
